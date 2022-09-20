@@ -98,7 +98,7 @@ bool PylonROS2DARTCamera::grab(Pylon::CGrabResultPtr& grab_result)
         // /!\ The dart camera device does not support
         // 'waitForFrameTriggerReady'
         cam_->ExecuteSoftwareTrigger();
-        cam_->RetrieveResult(grab_timeout_, grab_result,
+        cam_->RetrieveResult(10000, grab_result,
                              Pylon::TimeoutHandling_ThrowException);
     }   
     catch (const GenICam::GenericException &e)
@@ -116,6 +116,10 @@ bool PylonROS2DARTCamera::grab(Pylon::CGrabResultPtr& grab_result)
             else if (cam_->TriggerMode.GetValue() == TriggerModeEnums::TriggerMode_On)
             {
                 RCLCPP_ERROR_STREAM(LOGGER_DART, "Waiting for Trigger signal");
+                cam_->StopGrabbing();
+                RCLCPP_INFO(LOGGER_DART, "Grabbing stopped");
+                cam_->StartGrabbing(Pylon::EGrabStrategy::GrabStrategy_LatestImageOnly);
+                RCLCPP_INFO(LOGGER_DART, "Grabbing started");
             }
             else 
             {
